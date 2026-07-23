@@ -3,6 +3,11 @@ __pycache__/
 *.pyo
 *.pyd
 *.joblib
+!best_compressive_strength_model.joblib
+!model_ann.joblib
+!model_random_forest.joblib
+!model_svr.joblib
+!model_rsm_quadratic.joblib
 *.ipynb_checkpoints/
 .venv/
 .env
