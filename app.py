@@ -2,21 +2,26 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Concrete Strength Predictor", page_icon="📊", layout="centered")
+st.set_page_config(page_title="Civil Mix Strength Predictor", page_icon="🏗️", layout="wide")
 
 st.markdown(
     """
     <style>
-    :root {
-        color-scheme: light;
-    }
+    :root { color-scheme: light; }
     .stApp {
-        background-color: #f7f7f7;
-        color: #1f1f1f;
+        background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%);
+        color: #17324d;
     }
     .block-container {
-        padding-top: 1.5rem;
+        padding-top: 1.4rem;
         padding-bottom: 2rem;
+    }
+    .section-card {
+        background: white;
+        border: 1px solid #d9e2ea;
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 1px 3px rgba(23,50,77,0.06);
     }
     </style>
     """,
@@ -30,35 +35,77 @@ def load_model():
 
 
 def main():
-    st.title("Concrete Strength Predictor")
-    st.caption("Estimate compressive strength from the mix values below.")
+    st.title("Civil Engineering Mix Strength Predictor")
+    st.caption("A practical tool for estimating compressive strength from basic mix proportions.")
 
     model = load_model()
     feature_names = ["CNT_kg", "RCA_kg", "Water_kg", "Gum_Arabic_kg"]
 
-    with st.form("prediction_form"):
-        col1, col2 = st.columns(2)
+    data = pd.read_csv("comprehensive_strength.csv")
+    target = data["Comp Strength 1 (N/mm2) "]
 
-        with col1:
-            cnt = st.number_input("CNT (kg)", min_value=0.0, value=100.0, step=1.0)
-            rca = st.number_input("RCA (kg)", min_value=0.0, value=250.0, step=1.0)
+    st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Study data points", f"{len(data):,}")
+    with col2:
+        st.metric("Observed strength range", f"{target.min():.1f} - {target.max():.1f} N/mm²")
+    with col3:
+        st.metric("Average strength", f"{target.mean():.2f} N/mm²")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-        with col2:
-            water = st.number_input("Water (kg)", min_value=0.0, value=150.0, step=1.0)
-            gum = st.number_input("Gum Arabic (kg)", min_value=0.0, value=20.0, step=1.0)
+    st.markdown("")
+    left_col, right_col = st.columns([1.15, 0.85])
 
-        submitted = st.form_submit_button("Predict")
+    with left_col:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        st.subheader("Input values")
+        with st.form("prediction_form"):
+            c1, c2 = st.columns(2)
+            with c1:
+                cnt = st.number_input("CNT (kg)", min_value=0.0, value=120.0, step=1.0)
+                rca = st.number_input("RCA (kg)", min_value=0.0, value=230.0, step=1.0)
+            with c2:
+                water = st.number_input("Water (kg)", min_value=0.0, value=160.0, step=1.0)
+                gum = st.number_input("Gum Arabic (kg)", min_value=0.0, value=18.0, step=1.0)
+            submitted = st.form_submit_button("Estimate strength")
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    if submitted:
-        input_df = pd.DataFrame(
-            [[cnt, rca, water, gum]],
-            columns=feature_names,
-        )
-        prediction = model.predict(input_df)[0]
-
+    with right_col:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
         st.subheader("Result")
-        st.metric("Predicted compressive strength", f"{prediction:.2f} N/mm²")
-        st.info("This uses the saved model from the project folder.")
+        if submitted:
+            input_df = pd.DataFrame([[cnt, rca, water, gum]], columns=feature_names)
+            prediction = model.predict(input_df)[0]
+            st.metric("Predicted compressive strength", f"{prediction:.2f} N/mm²")
+            st.info("This estimate is based on the trained model and should be checked against laboratory testing for design use.")
+        else:
+            st.info("Enter the mix values on the left to get a prediction.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("")
+    st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+    st.subheader("Briefing for the analysis")
+    st.markdown(
+        """
+        - The model estimates compressive strength from four practical mix inputs: cement content, recycled aggregate content, water content, and gum arabic content.
+        - In civil engineering practice, water content and aggregate balance strongly influence the final strength, so the result should be treated as a planning estimate rather than a replacement for lab testing.
+        - The chart section below provides the supporting interpretation of the data trends and model fit.
+        """
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("")
+    st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+    st.subheader("Chart explanations")
+    chart_col1, chart_col2 = st.columns(2)
+    with chart_col1:
+        st.image("eda_corr.png", caption="Correlation plot: shows how the mix variables relate to strength and to each other.")
+        st.image("feature_importance.png", caption="Feature importance: highlights which input variables most influence the model output.")
+    with chart_col2:
+        st.image("eda_scatter.png", caption="Scatter view: helps compare each material input against the observed strength trend.")
+        st.image("predicted_vs_actual.png", caption="Prediction fit: shows how closely the model follows the measured compressive strength values.")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
