@@ -7,21 +7,30 @@ st.set_page_config(page_title="Civil Mix Strength Predictor", page_icon="🏗️
 st.markdown(
     """
     <style>
-    :root { color-scheme: light; }
+    :root { color-scheme: dark; }
     .stApp {
-        background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%);
-        color: #17324d;
+        background: linear-gradient(180deg, #07111d 0%, #0f1722 100%);
+        color: #e5edf7;
     }
     .block-container {
         padding-top: 1.4rem;
         padding-bottom: 2rem;
     }
     .section-card {
-        background: white;
-        border: 1px solid #d9e2ea;
+        background: #111b2a;
+        border: 1px solid #243244;
         border-radius: 14px;
         padding: 1rem 1.1rem;
-        box-shadow: 0 1px 3px rgba(23,50,77,0.06);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .stMetric { background: #0d1624; border-radius: 10px; padding: 0.6rem; }
+    div[data-testid="stNumberInput"] > div > div > input {
+        background-color: #0d1624;
+        color: #f4f8ff;
+    }
+    .stTextInput > div > div > input, .stTextArea > div > textarea {
+        background-color: #0d1624;
+        color: #f4f8ff;
     }
     </style>
     """,
